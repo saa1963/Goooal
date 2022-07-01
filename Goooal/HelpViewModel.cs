@@ -23,7 +23,11 @@ namespace Goooal
             new StrPair("D", "Команда-2 минус фол"),
             new StrPair("F", "Команда-2 плюс фол"),
             new StrPair("Пробел", "стоп/старт таймер"),
-            new StrPair("Ctrl-пробел", "Сброс таймера")
+            new StrPair("Ctrl-пробел", "Сброс таймера"),
+            new StrPair("Z", "Старт таймер атаки 15 сек"),
+            new StrPair("X", "Старт таймер атаки 24 сек"),
+            new StrPair("Стрелка Лево/Право", "(+/- таймер атаки)"),
+            new StrPair("Стрелка Вверх/Вниз", "(+/- таймер общего времени)")
         };
 
         public List<StrPair> lst

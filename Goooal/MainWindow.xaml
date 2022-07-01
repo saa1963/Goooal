@@ -20,8 +20,8 @@
         </Style>
         <Style x:Key="Timer_1" TargetType="TextBlock">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding Timer_1_InitOrEnded}"
-                        Value="True">
+                <DataTrigger Binding="{Binding Interval_1, Converter={StaticResource tsConverter_1}}"
+                        Value="0">
                     <Setter Property="Visibility"  Value="Hidden"></Setter>
                 </DataTrigger>
             </Style.Triggers>
@@ -88,6 +88,22 @@
         <KeyBinding 
                         Key="G"
                         Command="{Binding GraphCommand}">
+        </KeyBinding>
+        <KeyBinding 
+                        Key="Left"
+                        Command="{Binding LeftCommand}">
+        </KeyBinding>
+        <KeyBinding 
+                        Key="Right"
+                        Command="{Binding RightCommand}">
+        </KeyBinding>
+        <KeyBinding 
+                        Key="Up"
+                        Command="{Binding UpCommand}">
+        </KeyBinding>
+        <KeyBinding 
+                        Key="Down"
+                        Command="{Binding DownCommand}">
         </KeyBinding>
     </Window.InputBindings>
     <Grid>

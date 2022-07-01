@@ -13,11 +13,11 @@ namespace Goooal
 {
     enum TabloStates
     {
-        Начало, СбросТаймераБроска, Игра, ОстановкаПоТаймеруБроска, ОстановкаСудьей, Конец
+        Начало, СбросТаймераБроска, Игра, Остановка, Конец
     }
     enum TabloProcesses
     {
-        Space, Z, Self, Timer, Timer_1, Ctrl_Space, X
+        Space, Z, Self, Timer, Timer_1, Ctrl_Space, X, Ctrl_Z
     }
     public class MainWindowViewModel: NotifyPropertyChanged
     {
@@ -63,21 +63,16 @@ namespace Goooal
                 .Permit(TabloProcesses.Ctrl_Space, TabloStates.Начало)
                 .Permit(TabloProcesses.Z, TabloStates.СбросТаймераБроска)
                 .Permit(TabloProcesses.X, TabloStates.СбросТаймераБроска)
-                .Permit(TabloProcesses.Space, TabloStates.ОстановкаСудьей)
-                .Permit(TabloProcesses.Timer_1, TabloStates.ОстановкаПоТаймеруБроска)
+                .Permit(TabloProcesses.Space, TabloStates.Остановка)
+                .Permit(TabloProcesses.Timer_1, TabloStates.Остановка)
                 .Permit(TabloProcesses.Timer, TabloStates.Конец);
-            stateMachine.Configure(TabloStates.ОстановкаПоТаймеруБроска)
-                .OnEntry((x) => Init_ОстановкаПоТаймеруБроска_State9(x))
-                .Permit(TabloProcesses.X, TabloStates.СбросТаймераБроска)
-                .Permit(TabloProcesses.Z, TabloStates.СбросТаймераБроска)
-                .Permit(TabloProcesses.Ctrl_Space, TabloStates.Начало)
-                .PermitReentry(TabloProcesses.Space);
-            stateMachine.Configure(TabloStates.ОстановкаСудьей)
-                .OnEntry(() => Init_ОстановкаСудьей_State11())
+            stateMachine.Configure(TabloStates.Остановка)
+                .OnEntry((x) => Init_Остановка_State9_11(x))
                 .Permit(TabloProcesses.Z, TabloStates.СбросТаймераБроска)
                 .Permit(TabloProcesses.X, TabloStates.СбросТаймераБроска)
                 .Permit(TabloProcesses.Ctrl_Space, TabloStates.Начало)
-                .Permit(TabloProcesses.Space, TabloStates.Игра);
+                .PermitIf(TabloProcesses.Space, TabloStates.Игра, () => Interval_1.Seconds > 0)
+                .PermitReentryIf(TabloProcesses.Space, () => Interval_1.Seconds <= 0);
             stateMachine.Configure(TabloStates.Конец)
                 .OnEntry(() => Init_Конец_State16())
                 .Permit(TabloProcesses.Ctrl_Space, TabloStates.Начало)
@@ -97,12 +92,11 @@ namespace Goooal
             Timer.Start();
             Timer_1.Stop();
             TimerStopped = false;
-            Timer_1_InitOrEnded = true;
-            Interval_1 = m_АкуальноеНачальноеЗначениеТаймераБроска;
+            Interval_1 = m_АкуальноеНачальноеЗначениеТаймераБроска; 
             stateMachine.Fire(TabloProcesses.Self);
         }
 
-        private void Init_ОстановкаПоТаймеруБроска_State9(StateMachine<TabloStates, TabloProcesses>.Transition trans)
+        private void Init_Остановка_State9_11(StateMachine<TabloStates, TabloProcesses>.Transition trans)
         {
 #if DEBUG
             PlayName = "PI_9";
@@ -110,8 +104,6 @@ namespace Goooal
             Timer.Stop();
             Timer_1.Stop();
             TimerStopped = true;
-            Timer_1_InitOrEnded = true;
-            Interval_1 = m_АкуальноеНачальноеЗначениеТаймераБроска;
         }
 
         private void Init_Конец_State16()
@@ -122,18 +114,6 @@ namespace Goooal
             Timer.Stop();
             Timer_1.Stop();
             TimerStopped = false;
-            Timer_1_InitOrEnded = true;
-        }
-
-        private void Init_ОстановкаСудьей_State11()
-        {
-#if DEBUG
-            PlayName = "PP_11";
-#endif
-            Timer.Stop();
-            Timer_1.Stop();
-            TimerStopped = true;
-            //Timer_1_InitOrEnded = false;
         }
 
         private void Init_Игра_State6()
@@ -144,14 +124,6 @@ namespace Goooal
             Timer.Start();
             Timer_1.Start();
             TimerStopped = false;
-            if (Interval.TotalSeconds > Interval_1.TotalSeconds)
-            {
-                Timer_1_InitOrEnded = false;
-            }
-            else
-            {
-                Timer_1_InitOrEnded = true;
-            }
         }
 
         private void Init_Начало_State1()
@@ -162,9 +134,8 @@ namespace Goooal
             Timer.Stop();
             Timer_1.Stop();
             TimerStopped = false;
-            Timer_1_InitOrEnded = true;
             Interval = m_InitIntervalValue;
-            Interval_1 = m_InitIntervalValue_1;
+            Interval_1 = TimeSpan.Zero;
         }
 
         private bool m_TimerStopped = false;
@@ -175,16 +146,6 @@ namespace Goooal
             {
                 m_TimerStopped = value;
                 OnPropertyChanged("TimerStopped");
-            }
-        }
-        private bool m_Timer_1_InitOrEnded = true;
-        public bool Timer_1_InitOrEnded
-        {
-            get => m_Timer_1_InitOrEnded;
-            set
-            {
-                m_Timer_1_InitOrEnded = value;
-                OnPropertyChanged("Timer_1_InitOrEnded");
             }
         }
 
@@ -232,6 +193,7 @@ namespace Goooal
             }
             else
             {
+                Interval = Interval.Subtract(second);
                 stateMachine.Fire(TabloProcesses.Timer);
             }
         }
@@ -244,6 +206,7 @@ namespace Goooal
             }
             else
             {
+                Interval_1 = Interval_1.Subtract(second);
                 stateMachine.Fire(TabloProcesses.Timer_1);
             }
         }
@@ -431,6 +394,67 @@ namespace Goooal
         public RelayCommand EditDataCommand
         {
             get => new RelayCommand(EditData);
+        }
+        public RelayCommand LeftCommand
+        {
+            get => new RelayCommand(Left);
+        }
+        public RelayCommand RightCommand
+        {
+            get => new RelayCommand(Right);
+        }
+        public RelayCommand UpCommand
+        {
+            get => new RelayCommand(Up);
+        }
+
+        private void Up(object obj)
+        {
+            if (stateMachine.IsInState(TabloStates.Остановка))
+            {
+                if (Interval < m_InitIntervalValue)
+                {
+                    Interval = Interval.Add(TimeSpan.FromSeconds(1));
+                }
+            }
+        }
+
+        public RelayCommand DownCommand
+        {
+            get => new RelayCommand(Down);
+        }
+
+        private void Down(object obj)
+        {
+            if (stateMachine.IsInState(TabloStates.Остановка))
+            {
+                if (Interval > TimeSpan.Zero)
+                {
+                    Interval = Interval.Subtract(TimeSpan.FromSeconds(1));
+                }
+            }
+        }
+
+        private void Right(object obj)
+        {
+            if (stateMachine.IsInState(TabloStates.Остановка))
+            {
+                if (Interval_1 < m_InitIntervalValue_1 || Interval_1 < m_InitIntervalValue_2)
+                {
+                    Interval_1 = Interval_1.Add(TimeSpan.FromSeconds(1));
+                }
+            }
+        }
+
+        private void Left(object obj)
+        {
+            if (stateMachine.IsInState(TabloStates.Остановка))
+            {
+                if (Interval_1.Seconds > 0)
+                {
+                    Interval_1 = Interval_1.Subtract(TimeSpan.FromSeconds(1));
+                }
+            }
         }
 
         private void EditData(object obj)
