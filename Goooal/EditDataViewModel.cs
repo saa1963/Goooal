@@ -58,6 +58,16 @@ namespace Goooal
                 OnPropertyChanged("Attack");
             }
         }
+        private bool m_IsDirtyTime;
+        public bool IsDirtyTime
+        {
+            get => m_IsDirtyTime;
+            set
+            {
+                m_IsDirtyTime = value;
+                OnPropertyChanged("IsDirtyTime");
+            }
+        }
         private Color? m_LogoColor;
         public Color? LogoColor
         {

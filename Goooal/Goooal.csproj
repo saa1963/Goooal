@@ -61,7 +61,6 @@
       <DependentUpon>EditDataView.xaml</DependentUpon>
     </Compile>
     <Compile Include="EditDataViewModel.cs" />
-    <Compile Include="EditTimersViewModel.cs" />
     <Compile Include="ExeView.xaml.cs">
       <DependentUpon>ExeView.xaml</DependentUpon>
     </Compile>

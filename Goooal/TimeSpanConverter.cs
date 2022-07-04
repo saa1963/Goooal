@@ -13,7 +13,14 @@ namespace Goooal
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             TimeSpan v = (TimeSpan)value;
-            return v.Minutes.ToString("00") + ":" + v.Seconds.ToString("00");
+            if (v > TimeSpan.FromMinutes(1))
+            {
+                return v.Minutes.ToString("00") + ":" + v.Seconds.ToString("00");
+            }
+            else
+            {
+                return v.Seconds.ToString("00") + ":" + (v.Milliseconds / 100).ToString("00");
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

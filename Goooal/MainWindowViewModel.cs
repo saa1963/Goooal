@@ -27,6 +27,7 @@ namespace Goooal
         private TimeSpan m_InitIntervalValue_2 = new TimeSpan(0, 0, Attack_1);
         private TimeSpan m_АкуальноеНачальноеЗначениеТаймераБроска;
         private readonly TimeSpan second = new TimeSpan(0, 0, 1);
+        private readonly TimeSpan tenth = new TimeSpan(0, 0, 0, 0, 100);
         private DispatcherTimer Timer { get; set; }
         private DispatcherTimer Timer_1 { get; set; }
 
@@ -72,15 +73,14 @@ namespace Goooal
                 .Permit(TabloProcesses.X, TabloStates.СбросТаймераБроска)
                 .Permit(TabloProcesses.Ctrl_Space, TabloStates.Начало)
                 .PermitIf(TabloProcesses.Space, TabloStates.Игра, () => Interval_1.Seconds > 0)
-                .PermitReentryIf(TabloProcesses.Space, () => Interval_1.Seconds <= 0);
+                .PermitReentryIf(TabloProcesses.Space, () => Interval_1.Seconds <= 0)
+                .Permit(TabloProcesses.Timer, TabloStates.Конец);
             stateMachine.Configure(TabloStates.Конец)
                 .OnEntry(() => Init_Конец_State16())
                 .Permit(TabloProcesses.Ctrl_Space, TabloStates.Начало)
                 .PermitReentry(TabloProcesses.Space)
                 .PermitReentry(TabloProcesses.Z)
                 .PermitReentry(TabloProcesses.X);
-            SetTimer();
-            SetTimer_1();
             stateMachine.Fire(TabloProcesses.Ctrl_Space);
         }
 
@@ -101,9 +101,12 @@ namespace Goooal
 #if DEBUG
             PlayName = "PI_9";
 #endif
-            Timer.Stop();
+            if (!Settings.Default.IsDirtyTime)
+            {
+                Timer.Stop();
+                TimerStopped = true;
+            }
             Timer_1.Stop();
-            TimerStopped = true;
         }
 
         private void Init_Конец_State16()
@@ -131,6 +134,10 @@ namespace Goooal
 #if DEBUG
             PlayName = "II_1";
 #endif
+            Timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Send,
+                M_Timer_Tick, Dispatcher.CurrentDispatcher);
+            Timer_1 = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Send,
+                M_Timer_1_Tick, Dispatcher.CurrentDispatcher);
             Timer.Stop();
             Timer_1.Stop();
             TimerStopped = false;
@@ -171,29 +178,30 @@ namespace Goooal
             stateMachine.Fire(TabloProcesses.X);
         }
 
-        private void SetTimer()
-        {
-            Timer = new DispatcherTimer();
-            Timer.Tick += M_Timer_Tick;
-            Timer.Interval = new TimeSpan(0, 0, 1);
-        }
-
-        private void SetTimer_1()
-        {
-            Timer_1 = new DispatcherTimer();
-            Timer_1.Tick += M_Timer_1_Tick;
-            Timer_1.Interval = new TimeSpan(0, 0, 1);
-        }
-
         private void M_Timer_Tick(object sender, EventArgs e)
         {
             if (Interval.TotalSeconds > 0)
             {
-                Interval = Interval.Subtract(second);
+                if (Interval.TotalSeconds > 60)
+                {
+                    Interval = Interval.Subtract(second);
+                }
+                else if (Interval.TotalSeconds == 60)
+                {
+                    Timer.Stop();
+                    Timer = new DispatcherTimer(new TimeSpan(0, 0, 0, 0, 100), DispatcherPriority.Send,
+                        M_Timer_Tick, Dispatcher.CurrentDispatcher);
+                    Interval = Interval.Subtract(tenth);
+                    Timer.Start();
+                }
+                else
+                {
+                    Interval = Interval.Subtract(tenth);
+                }
             }
             else
             {
-                Interval = Interval.Subtract(second);
+                //Interval = Interval.Subtract(second);
                 stateMachine.Fire(TabloProcesses.Timer);
             }
         }
@@ -466,6 +474,7 @@ namespace Goooal
                 PlayName = PlayName,
                 Minutes = m_InitIntervalValue.Minutes,
                 Attack = m_InitIntervalValue_1.Seconds,
+                IsDirtyTime = Settings.Default.IsDirtyTime,
                 LogoColor = m_LogoColor.Color,
                 NormalTextColor = m_NormalTextColor.Color,
                 SelectedTextColor = m_SelectedTextColor.Color,
@@ -493,6 +502,7 @@ namespace Goooal
                 Settings.Default.PlayName = PlayName;
                 Settings.Default.Interval = vm.Minutes;
                 Settings.Default.Interval1 = vm.Attack;
+                Settings.Default.IsDirtyTime = vm.IsDirtyTime;
                 Settings.Default.LogoColor = LogoColor;
                 Settings.Default.NormalTextColor = NormalTextColor;
                 Settings.Default.SelectedTextColor = SelectedTextColor;

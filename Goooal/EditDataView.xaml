@@ -9,7 +9,7 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="ToolWindow"  Foreground="White"
         Title="Настройки"
-        Height="420" Width="400">
+        Height="450" Width="400">
         <DockPanel LastChildFill="False" Margin="15">
             <TabControl DockPanel.Dock="Top">
                 <TabItem>
@@ -64,7 +64,10 @@
                 UpdateSourceTrigger=PropertyChanged}" MaxLength="50">
                             </local:ClickSelectTextBox>
                         </StackPanel>
-
+                        <StackPanel Grid.Row="5">
+                            <Label>Общее время - "грязное"</Label>
+                            <CheckBox IsChecked="{Binding Path=IsDirtyTime, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                        </StackPanel>
                     </Grid>
                 </TabItem.Content>
                 </TabItem>
