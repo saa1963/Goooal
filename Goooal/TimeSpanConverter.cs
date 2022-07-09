@@ -19,7 +19,7 @@ namespace Goooal
             }
             else
             {
-                return v.Seconds.ToString("00") + ":" + (v.Milliseconds / 100).ToString("00");
+                return v.Minutes.ToString("00") + ":" + v.Seconds.ToString("00") + ":" + (v.Milliseconds / 100).ToString("00");
             }
         }
 

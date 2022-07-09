@@ -134,12 +134,14 @@ namespace Goooal
 #if DEBUG
             PlayName = "II_1";
 #endif
-            Timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Send,
-                M_Timer_Tick, Dispatcher.CurrentDispatcher);
-            Timer_1 = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Send,
-                M_Timer_1_Tick, Dispatcher.CurrentDispatcher);
-            Timer.Stop();
-            Timer_1.Stop();
+            if (Timer != null) Timer.Stop();
+            if (Timer_1 != null) Timer_1.Stop();
+            Timer = new DispatcherTimer();
+            Timer.Interval = TimeSpan.FromSeconds(1);
+            Timer.Tick += M_Timer_Tick;
+            Timer_1 = new DispatcherTimer();
+            Timer_1.Interval = TimeSpan.FromSeconds(1);
+            Timer_1.Tick += M_Timer_1_Tick;
             TimerStopped = false;
             Interval = m_InitIntervalValue;
             Interval_1 = TimeSpan.Zero;
