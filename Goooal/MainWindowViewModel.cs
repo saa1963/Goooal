@@ -23,8 +23,8 @@ namespace Goooal
     {
         private readonly TimeSpan testInterval = TimeSpan.FromMinutes(1);
         private const int Attack_1 = 24;
-        private TimeSpan m_InitIntervalValue = new TimeSpan(0, 10, 0);
-        private TimeSpan m_InitIntervalValue_1 = new TimeSpan(0, 0, 15);
+        private TimeSpan m_InitIntervalValue;
+        private TimeSpan m_InitIntervalValue_1;
         private TimeSpan m_InitIntervalValue_2 = new TimeSpan(0, 0, Attack_1);
         private TimeSpan m_АкуальноеНачальноеЗначениеТаймераБроска;
         private readonly TimeSpan second = new TimeSpan(0, 0, 1);
@@ -79,7 +79,8 @@ namespace Goooal
                 .PermitReentryIf(TabloProcesses.Space, () => Interval_1.Seconds <= 0)
                 .Permit(TabloProcesses.Timer, TabloStates.Конец)
                 .PermitIf(TabloProcesses.Alt_Space, TabloStates.ОстановкаВсего, () => Settings.Default.IsDirtyTime)
-                .PermitReentryIf(TabloProcesses.Alt_Space, () => !Settings.Default.IsDirtyTime);
+                .PermitReentryIf(TabloProcesses.Alt_Space, () => !Settings.Default.IsDirtyTime)
+                .PermitReentry(TabloProcesses.Timer_1);
             stateMachine.Configure(TabloStates.ОстановкаВсего)
                 .OnEntry((x) => Init_Остановка_Всего(x))
                 .Permit(TabloProcesses.Z, TabloStates.СбросТаймераБроска)
@@ -103,9 +104,7 @@ namespace Goooal
             PlayName = "AI_5";
 #endif
 
-            Timer.Start();
             Timer_1.Stop();
-            TimerStopped = false;
             if (Interval >= m_АкуальноеНачальноеЗначениеТаймераБроска)
                 Interval_1 = m_АкуальноеНачальноеЗначениеТаймераБроска;
             else
@@ -121,7 +120,6 @@ namespace Goooal
 #endif
             if (!Settings.Default.IsDirtyTime)
             {
-                Timer.Stop();
                 TimerStopped = true;
             }
             Timer_1.Stop();
@@ -132,7 +130,6 @@ namespace Goooal
 #if DEBUG
             PlayName = "PI_11";
 #endif
-            Timer.Stop();
             TimerStopped = true;
             Timer_1.Stop();
         }
@@ -142,9 +139,8 @@ namespace Goooal
 #if DEBUG
             PlayName = "EE_16";
 #endif
-            Timer.Stop();
+            TimerStopped = true;
             Timer_1.Stop();
-            TimerStopped = false;
         }
 
         private void Init_Игра_State6()
@@ -152,9 +148,9 @@ namespace Goooal
 #if DEBUG
             PlayName = "AA_6";
 #endif
-            Timer.Start();
-            Timer_1.Start();
             TimerStopped = false;
+            if (Interval >= m_АкуальноеНачальноеЗначениеТаймераБроска)
+                Timer_1.Start();
         }
 
         private void Init_Начало_State1()
@@ -162,26 +158,29 @@ namespace Goooal
 #if DEBUG
             PlayName = "II_1";
 #endif
-            if (Timer != null) Timer.Stop();
-            if (Timer_1 != null) Timer_1.Stop();
+           
+            Timer_1?.Stop();
+
             Timer = new DispatcherTimer();
             Timer.Interval = TimeSpan.FromSeconds(1);
             Timer.Tick += M_Timer_Tick;
+            TimerStopped = true;
+
             Timer_1 = new DispatcherTimer();
             Timer_1.Interval = TimeSpan.FromSeconds(1);
             Timer_1.Tick += M_Timer_1_Tick;
-            TimerStopped = false;
+
             Interval = m_InitIntervalValue;
             Interval_1 = TimeSpan.Zero;
         }
 
-        private bool m_TimerStopped = false;
         public bool TimerStopped
         {
-            get => m_TimerStopped;
+            get => !Timer.IsEnabled;
             set
             {
-                m_TimerStopped = value;
+                if (value) Timer?.Stop();
+                else Timer?.Start();
                 OnPropertyChanged("TimerStopped");
             }
         }
@@ -223,11 +222,17 @@ namespace Goooal
                 }
                 else if (Interval.TotalSeconds == 60)
                 {
-                    Timer.Stop();
+                    TimerStopped = true;
                     Timer = new DispatcherTimer(new TimeSpan(0, 0, 0, 0, 100), DispatcherPriority.Send,
                         M_Timer_Tick, Dispatcher.CurrentDispatcher);
                     Interval = Interval.Subtract(tenth);
-                    Timer.Start();
+                    TimerStopped = false;
+                }
+                else if (Interval == m_АкуальноеНачальноеЗначениеТаймераБроска)
+                {
+                    Interval_1 = TimeSpan.Zero;
+                    Interval = Interval.Subtract(tenth);
+                    stateMachine.Fire(TabloProcesses.Timer_1);
                 }
                 else
                 {
@@ -477,7 +482,8 @@ namespace Goooal
 
         private void Up(object obj)
         {
-            if (stateMachine.IsInState(TabloStates.ОстановкаВсего))
+            if ((stateMachine.IsInState(TabloStates.ОстановкаВсего) && Settings.Default.IsDirtyTime)
+                || (stateMachine.IsInState(TabloStates.Остановка) && !Settings.Default.IsDirtyTime))
             {
                 if (Interval < m_InitIntervalValue)
                 {
@@ -495,7 +501,8 @@ namespace Goooal
 
         private void Down(object obj)
         {
-            if (stateMachine.IsInState(TabloStates.ОстановкаВсего))
+            if ((stateMachine.IsInState(TabloStates.ОстановкаВсего) && Settings.Default.IsDirtyTime)
+                || (stateMachine.IsInState(TabloStates.Остановка) && !Settings.Default.IsDirtyTime))
             {
                 if (Interval > TimeSpan.Zero)
                 {
@@ -508,7 +515,8 @@ namespace Goooal
 
         private void Right(object obj)
         {
-            if (stateMachine.IsInState(TabloStates.ОстановкаВсего))
+            if((stateMachine.IsInState(TabloStates.ОстановкаВсего) && Settings.Default.IsDirtyTime)
+                || (stateMachine.IsInState(TabloStates.Остановка) && !Settings.Default.IsDirtyTime))
             {
                 if (Interval_1 < m_InitIntervalValue_1 || Interval_1 < m_InitIntervalValue_2)
                 {
@@ -519,7 +527,8 @@ namespace Goooal
 
         private void Left(object obj)
         {
-            if (stateMachine.IsInState(TabloStates.ОстановкаВсего))
+            if ((stateMachine.IsInState(TabloStates.ОстановкаВсего) && Settings.Default.IsDirtyTime)
+                || (stateMachine.IsInState(TabloStates.Остановка) && !Settings.Default.IsDirtyTime))
             {
                 if (Interval_1.Seconds > 0)
                 {
