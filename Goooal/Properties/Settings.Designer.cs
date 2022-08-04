@@ -25,7 +25,7 @@ namespace Goooal.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Команда-1")]
         public string Team1 {
             get {
                 return ((string)(this["Team1"]));
@@ -37,7 +37,7 @@ namespace Goooal.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Команда-2")]
         public string Team2 {
             get {
                 return ((string)(this["Team2"]));
@@ -49,7 +49,7 @@ namespace Goooal.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Название игры")]
         public string PlayName {
             get {
                 return ((string)(this["PlayName"]));
@@ -61,7 +61,7 @@ namespace Goooal.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
         public int Interval {
             get {
                 return ((int)(this["Interval"]));
@@ -73,7 +73,7 @@ namespace Goooal.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        [global::System.Configuration.DefaultSettingValueAttribute("15")]
         public int Interval1 {
             get {
                 return ((int)(this["Interval1"]));

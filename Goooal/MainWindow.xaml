@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Goooal"
-        mc:Ignorable="d" Background="{Binding BackgroundColor}" Foreground="{Binding NormalTextColor}"
+        Background="{Binding BackgroundColor}" Foreground="{Binding NormalTextColor}"
         WindowStyle="None" WindowState="Maximized"
         Title="MainWindow" Height="450" Width="800">
     <Window.Resources>
@@ -20,8 +20,8 @@
         </Style>
         <Style x:Key="Timer_1" TargetType="TextBlock">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding Interval_1, Converter={StaticResource tsConverter_1}}"
-                        Value="0">
+                <DataTrigger Binding="{Binding IsShowAttack_1}"
+                        Value="False">
                     <Setter Property="Visibility"  Value="Hidden"></Setter>
                 </DataTrigger>
             </Style.Triggers>
@@ -68,10 +68,6 @@
         <KeyBinding 
                         Key="Space" Modifiers="Ctrl"
                         Command="{Binding ResetTimerCommand}">
-        </KeyBinding>
-        <KeyBinding 
-                        Key="Space" Modifiers="Alt"
-                        Command="{Binding ResetTimerAllCommand}">
         </KeyBinding>
         <KeyBinding 
                         Key="Return"
@@ -186,13 +182,13 @@
                 </TextBlock>
             </Viewbox>
             <Viewbox Grid.Row="2">
-                <TextBlock Margin="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                           Style="{StaticResource Timer}" Text="{Binding Interval, Converter={StaticResource tsConverter}}">
+                <TextBlock Name="mainTimer" Margin="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" 
+                           Style="{StaticResource Timer}" Text="{Binding Path=mainTimer.TotalTime, Converter={StaticResource tsConverter}}">
                 </TextBlock>
             </Viewbox>
             <Viewbox Grid.Row="3">
                 <TextBlock Margin="1" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" 
-                           Style="{StaticResource Timer_1}" Text="{Binding Interval_1, Converter={StaticResource tsConverter_1}}">
+                           Style="{StaticResource Timer_1}" Text="{Binding Path=attackTimer.TotalTime, Converter={StaticResource tsConverter_1}}">
                 </TextBlock>
             </Viewbox>
         </Grid>

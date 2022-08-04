@@ -3,19 +3,19 @@
   <Profiles />
   <Settings>
     <Setting Name="Team1" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">Команда-1</Value>
     </Setting>
     <Setting Name="Team2" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">Команда-2</Value>
     </Setting>
     <Setting Name="PlayName" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
+      <Value Profile="(Default)">Название игры</Value>
     </Setting>
     <Setting Name="Interval" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">10</Value>
     </Setting>
     <Setting Name="Interval1" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">15</Value>
     </Setting>
     <Setting Name="LogoColor" Type="System.Windows.Media.SolidColorBrush" Scope="User">
       <Value Profile="(Default)" />

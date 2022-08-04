@@ -68,8 +68,10 @@
       <DependentUpon>HelpView.xaml</DependentUpon>
     </Compile>
     <Compile Include="HelpViewModel.cs" />
+    <Compile Include="MainWindowViewModel_1.cs" />
     <Compile Include="RelayCommand.cs" />
-    <Compile Include="TimerSeconds.cs" />
+    <Compile Include="TimerAttack.cs" />
+    <Compile Include="TimerCommon.cs" />
     <Compile Include="TimeSpanConverter.cs" />
     <Page Include="EditDataView.xaml">
       <SubType>Designer</SubType>
