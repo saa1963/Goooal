@@ -157,7 +157,8 @@ namespace Goooal
 
         private void СтопИгра_Init()
         {
-            TimerStopped = true;
+            if (!IsDirtyTime)
+                TimerStopped = true;
             attackTimer.Stop();
 #if DEBUG
             PlayName = $"СтопИгра {mainTimer?.IsEnabled.ToString() ?? "null"} {attackTimer?.IsEnabled.ToString() ?? "null"}";
@@ -215,6 +216,7 @@ namespace Goooal
             TimerStopped = true;
             mainTimer.Init();
             attackTimer.TotalTime = TimeSpan.Zero;
+            OnPropertyChanged("IsShowAttack_1");
 #if DEBUG
             PlayName = $"Начало {mainTimer?.IsEnabled.ToString() ?? "null"} {attackTimer?.IsEnabled.ToString() ?? "null"}";
 #endif
