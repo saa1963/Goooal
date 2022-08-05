@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Goooal.Properties;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -32,7 +33,8 @@ namespace Goooal
             Start();
         }
         private TimeSpan MaxTotalTime
-            => m_KindOfAttack == KindOfAttack.Attack15 ? TimeSpan.FromSeconds(15) : TimeSpan.FromSeconds(24);
+            => m_KindOfAttack == KindOfAttack.Attack15 ? TimeSpan.FromSeconds(Settings.Default.Interval1) 
+                : TimeSpan.FromSeconds(24);
         private void OnPropertyChanged()
         {
             PropertyChangedEventHandler handler = this.PropertyChanged;
