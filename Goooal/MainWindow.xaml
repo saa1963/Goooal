@@ -70,6 +70,10 @@
                         Command="{Binding ResetTimerCommand}">
         </KeyBinding>
         <KeyBinding 
+                        Key="Space" Modifiers="Alt"
+                        Command="{Binding TotalStopCommand}">
+        </KeyBinding>
+        <KeyBinding 
                         Key="Return"
                         Command="{Binding EditDataCommand}">
         </KeyBinding>

@@ -18,7 +18,7 @@ namespace Goooal
     }
     enum TProcesses
     {
-        Space, Ctrl_Space, Z, X, Self, Timer, Timer_1
+        Space, Ctrl_Space, Z, X, Self, Timer, Timer_1, Alt_Space
     }
     public enum KindOfAttack { Attack15, Attack24 }
     internal class MainWindowViewModel_1 : NotifyPropertyChanged
@@ -47,6 +47,7 @@ namespace Goooal
             stateMachine = new StateMachine<TStates, TProcesses>(TStates.Начало);
             stateMachine.Configure(TStates.Начало).OnEntry(() => Начало_Init())
                 .Ignore(TProcesses.Space)
+                .Ignore(TProcesses.Alt_Space)
                 .PermitReentry(TProcesses.Ctrl_Space)
                 .Permit(TProcesses.Z, TStates.СбросАтаки15)
                 .Permit(TProcesses.X, TStates.СбросАтаки24)
@@ -54,6 +55,7 @@ namespace Goooal
                 .Ignore(TProcesses.Timer_1);
             stateMachine.Configure(TStates.СбросАтаки15).OnEntry(() => СбросАтаки15_Init())
                 .Ignore(TProcesses.Space)
+                .Ignore(TProcesses.Alt_Space)
                 .Ignore(TProcesses.Ctrl_Space)
                 .Ignore(TProcesses.Z)
                 .Ignore(TProcesses.X)
@@ -62,6 +64,7 @@ namespace Goooal
                 .Permit(TProcesses.Timer_1, TStates.Ошибка);
             stateMachine.Configure(TStates.СбросАтаки24).OnEntry(() => СбросАтаки24_Init())
                 .Ignore(TProcesses.Space)
+                .Ignore(TProcesses.Alt_Space)
                 .Ignore(TProcesses.Ctrl_Space)
                 .Ignore(TProcesses.Z)
                 .Ignore(TProcesses.X)
@@ -70,6 +73,7 @@ namespace Goooal
                 .Permit(TProcesses.Timer_1, TStates.Ошибка);
             stateMachine.Configure(TStates.Атака15).OnEntry((x) => Атака15_Init(x))
                 .Permit(TProcesses.Space, TStates.СтопИгра)
+                .Permit(TProcesses.Alt_Space, TStates.СтопИгра)
                 .Permit(TProcesses.Ctrl_Space, TStates.Начало)
                 .Permit(TProcesses.Z, TStates.СбросАтаки15)
                 .Permit(TProcesses.X, TStates.СбросАтаки24)
@@ -78,6 +82,7 @@ namespace Goooal
                 .Permit(TProcesses.Timer_1, TStates.НетАтаки);
             stateMachine.Configure(TStates.Атака24).OnEntry((x) => Атака24_Init(x))
                 .Permit(TProcesses.Space, TStates.СтопИгра)
+                .Permit(TProcesses.Alt_Space, TStates.СтопИгра)
                 .Permit(TProcesses.Ctrl_Space, TStates.Начало)
                 .Permit(TProcesses.Z, TStates.СбросАтаки15)
                 .Permit(TProcesses.X, TStates.СбросАтаки24)
@@ -85,6 +90,7 @@ namespace Goooal
                 .Permit(TProcesses.Timer, TStates.Конец)
                 .Permit(TProcesses.Timer_1, TStates.НетАтаки);
             stateMachine.Configure(TStates.НетАтаки).OnEntry((x) => НетАтаки_Init(x))
+                .Ignore(TProcesses.Alt_Space)
                 .PermitIf(TProcesses.Space, TStates.СтопИгра, () => Settings.Default.IsDirtyTime)
                 .IgnoreIf(TProcesses.Space, () => !Settings.Default.IsDirtyTime)
                 .Permit(TProcesses.Ctrl_Space, TStates.Начало)
@@ -94,7 +100,8 @@ namespace Goooal
                 .IgnoreIf(TProcesses.Self, () => Settings.Default.IsDirtyTime)
                 .Permit(TProcesses.Timer, TStates.Конец)
                 .Ignore(TProcesses.Timer_1);
-            stateMachine.Configure(TStates.СтопИгра).OnEntry(() => СтопИгра_Init())
+            stateMachine.Configure(TStates.СтопИгра).OnEntry((x) => СтопИгра_Init(x))
+                .PermitReentry(TProcesses.Alt_Space)
                 .PermitIf(TProcesses.Space, TStates.НетАтаки,
                     () => attackTimer.TotalTime == TimeSpan.Zero && Settings.Default.IsDirtyTime)
                 .IgnoreIf(TProcesses.Space, () => attackTimer.TotalTime == TimeSpan.Zero && !Settings.Default.IsDirtyTime)
@@ -109,6 +116,7 @@ namespace Goooal
                 .Permit(TProcesses.Timer, TStates.Конец)
                 .Ignore(TProcesses.Timer_1);
             stateMachine.Configure(TStates.Конец).OnEntry(() => Конец_Init())
+                .Ignore(TProcesses.Alt_Space)
                 .Ignore(TProcesses.Space)
                 .Permit(TProcesses.Ctrl_Space, TStates.Начало)
                 .Ignore(TProcesses.Z)
@@ -155,10 +163,17 @@ namespace Goooal
 #endif
         }
 
-        private void СтопИгра_Init()
+        private void СтопИгра_Init(StateMachine<TStates, TProcesses>.Transition x)
         {
-            if (!IsDirtyTime)
+            if (x.Trigger != TProcesses.Alt_Space)
+            {
+                if (!IsDirtyTime)
+                    TimerStopped = true;
+            }
+            else
+            {
                 TimerStopped = true;
+            }
             attackTimer.Stop();
 #if DEBUG
             PlayName = $"СтопИгра {mainTimer?.IsEnabled.ToString() ?? "null"} {attackTimer?.IsEnabled.ToString() ?? "null"}";
@@ -363,6 +378,10 @@ namespace Goooal
         {
             get => new RelayCommand(ResetTimer);
         }
+        public RelayCommand TotalStopCommand
+        {
+            get => new RelayCommand(TotalStop);
+        }
         public RelayCommand Fouls2IncCommand
         {
             get => new RelayCommand(s => Fouls2++);
@@ -510,6 +529,10 @@ namespace Goooal
         private void ResetTimer(object obj)
         {
             stateMachine.Fire(TProcesses.Ctrl_Space);
+        }
+        private void TotalStop(object obj)
+        {
+            stateMachine.Fire(TProcesses.Alt_Space);
         }
 
         private void SwitchTimer(object obj)
